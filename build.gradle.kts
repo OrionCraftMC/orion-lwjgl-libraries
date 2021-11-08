@@ -27,16 +27,24 @@ tasks {
             relocate(it, "${project.group}.libs.$it")
         }
 
-        val simpleRelocator =
-            SimpleRelocator("""(.+?)((?:\.(?:sha1|git|so|dylib|dll))+)""", "\$1_orion\$2", listOf(), listOf(), true)
+        arrayOf(
+            """(windows|macos|linux)(/x64/)(.+?)((?:\.(?:sha1|git|so|dylib|dll))+)""" to "\$1\$2${
+                "${project.group}.libs".replace(
+                    '.',
+                    '/'
+                )
+            }/\$3_orion\$4",
+        ).forEach { pair ->
+            val relocator = SimpleRelocator(pair.first, pair.second, listOf(), listOf(), true)
 
-        arrayOf("pattern", "shadedPattern").forEach {
-            simpleRelocator.javaClass.getDeclaredField(it).apply {
-                isAccessible = true
-                set(simpleRelocator, "")
+            arrayOf("pattern", "shadedPattern").forEach {
+                relocator.javaClass.getDeclaredField(it).apply {
+                    isAccessible = true
+                    set(relocator, "")
+                }
             }
+            relocate(relocator)
         }
-        relocate(simpleRelocator)
     }
 }
 
