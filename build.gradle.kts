@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.relocation.SimpleRelocator
+
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.0"
@@ -24,6 +26,17 @@ tasks {
         arrayOf("org.lwjgl").forEach {
             relocate(it, "${project.group}.libs.$it")
         }
+
+        val simpleRelocator =
+            SimpleRelocator("""(.+?)((?:\.(?:sha1|git|so|dylib|dll))+)""", "\$1_orion\$2", listOf(), listOf(), true)
+
+        arrayOf("pattern", "shadedPattern").forEach {
+            simpleRelocator.javaClass.getDeclaredField(it).apply {
+                isAccessible = true
+                set(simpleRelocator, "")
+            }
+        }
+        relocate(simpleRelocator)
     }
 }
 
