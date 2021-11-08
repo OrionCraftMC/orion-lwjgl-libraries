@@ -1,6 +1,7 @@
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.0"
+    `maven-publish`
 }
 
 group = "io.github.orioncraftmc"
@@ -13,6 +14,7 @@ repositories {
 tasks {
     build.get().dependsOn(shadowJar)
     shadowJar {
+        minimize()
         archiveClassifier.set(null as String?)
 
         arrayOf("org.lwjgl").forEach {
@@ -34,5 +36,13 @@ dependencies {
         runtimeOnly("org.lwjgl", "lwjgl", classifier = nativeClassifier)
         runtimeOnly("org.lwjgl", "lwjgl-nanovg", classifier = nativeClassifier)
         runtimeOnly("org.lwjgl", "lwjgl-yoga", classifier = nativeClassifier)
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            artifact(tasks["shadowJar"])
+        }
     }
 }
