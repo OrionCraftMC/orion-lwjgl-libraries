@@ -14,9 +14,13 @@ repositories {
 tasks {
     build.get().dependsOn(shadowJar)
     shadowJar {
-        minimize()
         archiveClassifier.set(null as String?)
+        // Keep these as is
+        arrayOf("org.lwjgl.nanovg", "org.lwjgl.util.yoga").forEach {
+            relocate(it, it)
+        }
 
+        // Relocate these to a different package
         arrayOf("org.lwjgl").forEach {
             relocate(it, "${project.group}.libs.$it")
         }
